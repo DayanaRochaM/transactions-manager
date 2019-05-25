@@ -17,15 +17,8 @@ import java.util.Map;
 public class Tr_Manager {
     
     // Columns : 0 - id, 1 - timestamp, 2 - status
-    //ArrayList< ArrayList > matrix = new ArrayList< >();
     Map<String, List<String>> matrix = new HashMap<>();
     String active, committed, aborted;
-    
-    // To add in the matrix
-    // matriz.add( new ArrayList< YourObject >() );
-    
-    // To acess
-    // matriz.get( line ).get( column );
     
     Tr_Manager() {
         active = "ACTIVE";

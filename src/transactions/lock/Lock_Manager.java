@@ -5,8 +5,8 @@
  */
 package transactions.lock;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,8 +16,8 @@ import java.util.Map;
 public class Lock_Manager {
     
     // columns: 0 - dado, 1 - id transaction, 2 - lock type
-    ArrayList< ArrayList > Lock_Table = new ArrayList< >();
-    // columns: 0 - id, 1 - queue of who's waiting for access the dado
+    Map<String, List<String>> Lock_Table = new HashMap<>();
+    // columns: 0 - dado, 1 - queue of who's waiting for access the dado
     Map<String, Wait_Q> dado_queue = new HashMap<String, Wait_Q>();
     String shared, exclusive;
     

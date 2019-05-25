@@ -17,10 +17,11 @@ public class Wait_Q {
     // columns : 0 - id transaction, 1 - type lock 
     Map<String, String> cache = new LinkedHashMap<>(0,0,false);
     
-    void addToQueue(){
-        // Essa funcao adiciona uma linha ao Map
+    void addToQueue(String idTransaction, String typeLock){
+        cache.put(idTransaction, typeLock);
     }
     
-    void removeFromQueue(){
+    void removeFromQueue(String idTransaction){
+        cache.remove(idTransaction);
     }
 }
