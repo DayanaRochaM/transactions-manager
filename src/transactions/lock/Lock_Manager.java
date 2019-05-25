@@ -5,9 +5,12 @@
  */
 package transactions.lock;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import transactions.Tr_Manager;
 
 /**
  *
@@ -17,6 +20,7 @@ public class Lock_Manager {
     
     // columns: 0 - dado, 1 - id transaction, 2 - lock type
     Map<String, List<String>> Lock_Table = new HashMap<>();
+    
     // columns: 0 - dado, 1 - queue of who's waiting for access the dado
     Map<String, Wait_Q> dado_queue = new HashMap<String, Wait_Q>();
     String shared, exclusive;
@@ -33,11 +37,39 @@ public class Lock_Manager {
     String isExclusive(){
         return exclusive;
     }
+
+    
     
     void LS(String idTransaction, String dado){
         // Insere um bloqueio no modo compartilhado(S) na Lock Table 
         // sobre o item "dado" para a transacao "idTransaction" se puder, 
         // caso contrario cria/atualiza a Wait_Q do dado em questao com a transacao.
+        
+        List<String> ls = new ArrayList<>(); //id_transaction and lock_type
+        Wait_Q w; //id_transaction and lock_type
+        ls.add(idTransaction);
+        ls.add(isShared());
+                                            //falta associar com timestamp
+        if(dado_queue.isEmpty()==false){
+            if(dado_queue.containsValue(dado)){
+                System.out.println("A fila já contém o dado.");
+                w.put(idTransaction, isShared());
+            }
+
+            if(dado_queue.containsValue(dado)==false && Lock_Table.isEmpty()==false){
+                w.put(idTransaction, isShared());
+            }
+
+        } else {
+            if(Lock_Table.containsValue(dado)){
+                if(Lock_Table.containsValue(ls)){
+                    System.out.println("A Tabela de bloqueios já bloqueou esta transação.");
+                }
+            } else {
+                Lock_Table.put(dado,ls);
+            }
+        }
+        
     }
     
     void LX(String idTransaction, String dado){ 
@@ -64,4 +96,6 @@ public class Lock_Manager {
         // * Essa decisao vale tanto para Exclusive sobre Shared 
         // como para Shared sobre Exclusive
     }
+
+
 }
