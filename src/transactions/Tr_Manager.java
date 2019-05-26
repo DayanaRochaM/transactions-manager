@@ -18,7 +18,7 @@ public class Tr_Manager {
     
     // Columns : 0 - id, 1 - timestamp, 2 - status
     Map<String, List<String>> matrix = new HashMap<>();
-    List<String> timeAndStatus= new ArrayList<>();
+    //List<String> timeAndStatus= new ArrayList<>();
     String active, committed, aborted;
     
     Tr_Manager() {
