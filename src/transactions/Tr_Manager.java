@@ -18,6 +18,7 @@ public class Tr_Manager {
     
     // Columns : 0 - id, 1 - timestamp, 2 - status
     Map<String, List<String>> matrix = new HashMap<>();
+    List<String> timeAndStatus= new ArrayList<>();
     String active, committed, aborted;
     
     Tr_Manager() {
@@ -47,5 +48,12 @@ public class Tr_Manager {
         // Retorna o timestamp da transacao
         return matrix.get(idTransaction).get(0);
     }
+    
+//     void addTr(String idTransaction, String status){
+        
+//         timeAndStatus.add(Integer.toString(getTimestamp(idTransaction)));
+//         timeAndStatus.add(status);
+//         matrix.put(idTransaction,timeAndStatus);
+//     }
     
 }
