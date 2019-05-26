@@ -7,6 +7,7 @@ package transactions;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import transactions.filemanager.ArchiveReader;
 
 /**
@@ -23,8 +24,8 @@ public class Main {
         // Reading file
         ArchiveReader reader = new ArchiveReader();
         // Returning List<String> lines
-        reader.readFile("fileteste");
-        
+        List<String> lines = reader.readFile("fileteste");
+        reader.executeLines(lines);
     }
     
 }

@@ -46,18 +46,20 @@ public class Lock_Manager {
         // caso contrario cria/atualiza a Wait_Q do dado em questao com a transacao.
         
         List<String> ls = new ArrayList<>(); //id_transaction and lock_type
-        Wait_Q w; //id_transaction and lock_type
+        Wait_Q w = new Wait_Q(); //id_transaction and lock_type
         ls.add(idTransaction);
         ls.add(isShared());
                                             //falta associar com timestamp
         if(dado_queue.isEmpty()==false){
             if(dado_queue.containsValue(dado)){
                 System.out.println("A fila já contém o dado.");
-                w.put(idTransaction, isShared());
+                w = dado_queue.get(dado);
+                w.addToQueue(idTransaction, isShared());
             }
 
             if(dado_queue.containsValue(dado)==false && Lock_Table.isEmpty()==false){
-                w.put(idTransaction, isShared());
+                w.addToQueue(idTransaction, isShared());
+                dado_queue.put(dado, w);
             }
 
         } else {

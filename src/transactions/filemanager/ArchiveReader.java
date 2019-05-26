@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 /**
  *
@@ -17,6 +19,7 @@ import java.util.List;
  */
 public class ArchiveReader {
     
+    PrintStream p = System.out; // So pra simplificar o uso do print
     public List<String> readFile(String filename) throws FileNotFoundException, IOException{
         
         List<String> lines = new ArrayList<>();
@@ -36,7 +39,7 @@ public class ArchiveReader {
         return lines;
     }
     
-    void executeLine(String line){
+    public void executeLine(String line){
         // Quebrar linha em operacoes a serem executadas.
         // É preciso identificar o que cada operacao vai realizar (de preferencia
         // usar use case e "contains" pra string, remover essa parte da string e pegar
@@ -50,9 +53,26 @@ public class ArchiveReader {
         //
         // DICA: procurar funcao parecida com o "split" do python pra dividir
         // cada linha em comando. 
+        
+        // Pegando cada operacao
+        List<String> commands = new ArrayList<>();
+        commands =  Arrays.asList(line.split(","));
+        
+        for(String command: commands){
+            // FALTA QUESTAO DO TIMESTAMP
+            if (command.contains("BT")){
+                // Pegando identificador
+                String idTransaction = command.split("[\\(\\)]")[1];
+                p.println(idTransaction);
+            }
+                    
+        }
     }
     
-    void executeLines(List<String> lines){
+    public void executeLines(List<String> lines){
         // Caso geral que executa a funcao acima para toda linha
+        for(String line: lines){
+            this.executeLine(line);
+        }
     }
 }
