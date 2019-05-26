@@ -24,4 +24,8 @@ public class Wait_Q {
     void removeFromQueue(String idTransaction){
         cache.remove(idTransaction);
     }
+    
+    String getTypeLock(String idTransaction, String typelock){
+        return cache.get(typelock).get(idTransaction);
+    }
 }
