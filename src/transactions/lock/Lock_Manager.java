@@ -49,37 +49,39 @@ public class Lock_Manager {
     }
 
     
-    public void LS(String idTransaction, String dado){
-        // Insere um bloqueio no modo compartilhado(S) na Lock Table 
-        // sobre o item "dado" para a transacao "idTransaction" se puder, 
-        // caso contrario cria/atualiza a Wait_Q do dado em questao com a transacao.
-        
-        List<String> ls = new ArrayList<>(); //id_transaction and lock_type
-        ls.add(idTransaction);
-        ls.add(isShared());
-                                            //falta associar com timestamp
-        if(dado_queue.isEmpty()==false){
-            if(dado_queue.containsValue(dado)){
-                System.out.println("A fila já contém o dado.");
-                waitq = dado_queue.get(dado);
-                waitq.addToQueue(idTransaction, isShared());
-            }
-
-            if(dado_queue.containsValue(dado)==false && Lock_Table.isEmpty()==false){
-                waitq.addToQueue(idTransaction, isShared());
-                dado_queue.put(dado, waitq);
-            }
-
-        } else {
-            if(Lock_Table.containsValue(dado)){
-                if(Lock_Table.containsValue(ls)){
-                    System.out.println("A Tabela de bloqueios já bloqueou esta transação.");
+    public void LS(String idTransaction2, String dado){
+       
+        // Percorrendo tabela pra saber se existe algum tipo de lock sobre o 
+        // dado desejado
+        String idTransaction1;
+        boolean processed = false; // Indica se a operacao foi já abortada ou pra fila
+        Iterator<String> ids = this.Lock_Table.keySet().iterator();
+        while(ids.hasNext() && !processed){           
+            idTransaction1 = ids.next();
+            p.println(idTransaction1);
+            List<String> dadoAndLock = this.Lock_Table.get(idTransaction1);
+            if(dadoAndLock.get(0).equals(dado)){
+                // Caso em que há outra transação com lock sobre o dado
+                if(!idTransaction1.equals(idTransaction2)){
+                    this.WaitDie(idTransaction1, idTransaction2, dado, this.isShared());
                 }
-            } else {
-                Lock_Table.put(dado,ls);
+                // Caso em que a transação já tem lock sobre o dado
+                else{
+                    List<String> newdadoAndLock = new ArrayList<>();
+                    newdadoAndLock.add(dado);
+                    newdadoAndLock.add(this.isShared());
+                    this.Lock_Table.put(idTransaction2, dadoAndLock);
+                }
+                processed = true;
             }
         }
-        
+        // Caso em que não há transacao acessando o dado
+        if(!processed){
+            List<String> dadoAndLock = new ArrayList<>();
+            dadoAndLock.add(dado);
+            dadoAndLock.add(this.isShared());
+            this.Lock_Table.put(idTransaction2, dadoAndLock);
+        }   
     }
     
     public void LX(String idTransaction2, String dado){ 
