@@ -21,7 +21,15 @@ public class Wait_Q {
         cache.put(idTransaction, typeLock);
     }
     
+    Map<String, String> getQueue(){
+        return this.cache;
+    }
+    
     void removeFromQueue(String idTransaction){
         cache.remove(idTransaction);
+    }
+    
+    String getTypeLock(String idTransaction){
+        return cache.get(idTransaction);
     }
 }

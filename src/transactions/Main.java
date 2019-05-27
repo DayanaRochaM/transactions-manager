@@ -8,7 +8,7 @@ package transactions;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import transactions.filemanager.ArchiveReader;
+import transactions.filemanager.FileManager;
 
 /**
  *
@@ -22,10 +22,10 @@ public class Main {
     public static void main(String[] args) throws FileNotFoundException, IOException {
         
         // Reading file
-        ArchiveReader reader = new ArchiveReader();
+        FileManager manager = new FileManager();
         // Returning List<String> lines
-        List<String> lines = reader.readFile("fileteste");
-        reader.executeLines(lines);
+        List<String> lines = manager.readFile("fileteste");
+        manager.executeLines(lines);
     }
     
 }

@@ -13,13 +13,15 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import transactions.Tr_Manager;
 /**
  *
  * @author pucks
  */
-public class ArchiveReader {
+public class FileManager {
     
     PrintStream p = System.out; // So pra simplificar o uso do print
+    Tr_Manager trManager = new Tr_Manager();
     public List<String> readFile(String filename) throws FileNotFoundException, IOException{
         
         List<String> lines = new ArrayList<>();
@@ -40,19 +42,11 @@ public class ArchiveReader {
     }
     
     public void executeLine(String line){
-        // Quebrar linha em operacoes a serem executadas.
-        // É preciso identificar o que cada operacao vai realizar (de preferencia
-        // usar use case e "contains" pra string, remover essa parte da string e pegar
-        // o resto pra ser o id da transacao)
-        //
         // As possiveis operacoes sao:
         // • BT(A): inicia uma transacao com identiﬁcador de valor A (ACTIVE)
         // • R1(x): transacao 1 deseja ler o item x 
         // • W1(x): transacao 1 deseja escrever o item x 
         // • CM(A): transacao A confirma suas operacoes (COMMITED)
-        //
-        // DICA: procurar funcao parecida com o "split" do python pra dividir
-        // cada linha em comando. 
         
         // Pegando cada operacao
         List<String> commands = new ArrayList<>();
@@ -60,12 +54,48 @@ public class ArchiveReader {
         
         for(String command: commands){
             // FALTA QUESTAO DO TIMESTAMP
-            if (command.contains("BT")){
-                // Pegando identificador
+            
+            // BEGIN TRANSACTION
+            if (command.startsWith("BT")){
+                // getting idTransaction
                 String idTransaction = command.split("[\\(\\)]")[1];
-                p.println(idTransaction);
+                trManager.BT(idTransaction);
             }
-                    
+            
+            // READ
+            else if (command.startsWith("R")){
+                String [] parts = command.split("[\\(\\)]");
+                // getting idTransaction
+                String idTransaction = parts[0].replace("R","");
+                // getting dado
+                String dado = parts[1];
+                
+                this.trManager.R(idTransaction, dado);
+            }
+            
+            // WRITE
+            else if (command.startsWith("W")){
+                String [] parts = command.split("[\\(\\)]");
+                // getting idTransaction
+                String idTransaction = parts[0].replace("W","");
+                // getting dado
+                String dado = parts[1];
+                
+                this.trManager.W(idTransaction, dado);
+            }
+            
+            // COMMIT
+            else if (command.startsWith("CM")){
+                String [] parts = command.split("[\\(\\)]");
+                // getting idTransaction
+                String idTransaction = parts[1];
+                
+                this.trManager.CM(idTransaction);
+            }
+            
+            else{
+                p.println("OPERACAO IRRECONHECIDA!");
+            }
         }
     }
     
