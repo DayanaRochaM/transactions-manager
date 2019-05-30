@@ -26,7 +26,6 @@ public class Lock_Manager {
     
     // columns: 0 - id transaction, 1 - dado, 2 - lock type
     Map<String, List<String>> Lock_Table = new HashMap<>();
-    Wait_Q waitq = new Wait_Q();
     // columns: 0 - dado, 1 - queue of who's waiting for access the dado
     Map<String, Wait_Q> dado_queue = new HashMap<String, Wait_Q>();
     
@@ -51,6 +50,10 @@ public class Lock_Manager {
     
     public void LS(String idTransaction2, String dado){
        
+        // Criar logo a fila do dado
+        if(!this.dado_queue.containsKey(dado)){
+            this.dado_queue.put(dado, new Wait_Q());
+        }
         // Percorrendo tabela pra saber se existe algum tipo de lock sobre o 
         // dado desejado
         String idTransaction1;
@@ -58,9 +61,9 @@ public class Lock_Manager {
         Iterator<String> ids = this.Lock_Table.keySet().iterator();
         while(ids.hasNext() && !processed){           
             idTransaction1 = ids.next();
-            p.println(idTransaction1);
             List<String> dadoAndLock = this.Lock_Table.get(idTransaction1);
             if(dadoAndLock.get(0).equals(dado)){
+                p.println("dado igual");
                 // Caso em que há outra transação com lock sobre o dado
                 if(!idTransaction1.equals(idTransaction2)){
                     this.WaitDie(idTransaction1, idTransaction2, dado, this.isShared());
@@ -70,22 +73,28 @@ public class Lock_Manager {
                     List<String> newdadoAndLock = new ArrayList<>();
                     newdadoAndLock.add(dado);
                     newdadoAndLock.add(this.isShared());
-                    this.Lock_Table.put(idTransaction2, dadoAndLock);
+                    this.Lock_Table.put(idTransaction2, newdadoAndLock);
                 }
                 processed = true;
             }
         }
         // Caso em que não há transacao acessando o dado
         if(!processed){
+            p.println("entrou");
             List<String> dadoAndLock = new ArrayList<>();
             dadoAndLock.add(dado);
             dadoAndLock.add(this.isShared());
             this.Lock_Table.put(idTransaction2, dadoAndLock);
-        }   
+        }  
+        p.println("\n\nLS: ");
+        this.printLockTable();
     }
     
     public void LX(String idTransaction2, String dado){ 
         
+        if(!this.dado_queue.containsKey(dado)){
+            this.dado_queue.put(dado, new Wait_Q());
+        }
         // Percorrendo tabela pra saber se existe algum tipo de lock sobre o 
         // dado desejado
         String idTransaction1;
@@ -93,19 +102,18 @@ public class Lock_Manager {
         Iterator<String> ids = this.Lock_Table.keySet().iterator();
         while(ids.hasNext() && !processed){           
             idTransaction1 = ids.next();
-            p.println(idTransaction1);
             List<String> dadoAndLock = this.Lock_Table.get(idTransaction1);
             if(dadoAndLock.get(0).equals(dado)){
                 // Caso em que há outra transação com lock sobre o dado
                 if(!idTransaction1.equals(idTransaction2)){
-                    this.WaitDie(idTransaction1, idTransaction2, dado, this.isExclusive());
+                   this.WaitDie(idTransaction1, idTransaction2, dado, this.isExclusive());
                 }
                 // Caso em que a transação já tem lock sobre o dado
                 else{
                     List<String> newdadoAndLock = new ArrayList<>();
                     newdadoAndLock.add(dado);
                     newdadoAndLock.add(this.isExclusive());
-                    this.Lock_Table.put(idTransaction2, dadoAndLock);
+                    this.Lock_Table.put(idTransaction2, newdadoAndLock);
                 }
                 processed = true;
             }
@@ -118,6 +126,8 @@ public class Lock_Manager {
             dadoAndLock.add(this.isExclusive());
             this.Lock_Table.put(idTransaction2, dadoAndLock);
         }
+        p.println("\n\nLX: ");
+        this.printLockTable();
     }
 
     public void U(String idTransaction){
@@ -127,8 +137,12 @@ public class Lock_Manager {
             dado = this.Lock_Table.get(idTransaction).get(0);
             this.Lock_Table.remove(idTransaction);
             this.getElementsFromQueue(dado);
+        }else{
+            p.println("Nao há esse elemento!");
         }
         // Aqui deve-se pegar a lista do dado e pegar a proxima transacao
+        p.println("\n\nU: ");
+        this.printLockTable();
     }
     
     void getElementsFromQueue(String dado){
@@ -193,11 +207,20 @@ public class Lock_Manager {
         // 1 - Se o timestamp Ti < timestamp Tj, Tj é abortada (ABORTED)
         // 2 - Caso contrario, Tj vai pra Wait_Q do dado
         if(this.trManager.getTimestamp(idTransaction1) < this.trManager.getTimestamp(idTransaction2)){
+            p.println("abort");
             this.trManager.toAbort(idTransaction2);
         }else{
+            // Ver se tem uma fila 
             this.dado_queue.get(dado).addToQueue(idTransaction2, lockType);
         }
+        this.U(idTransaction2);
     }
 
-
+    void printLockTable(){
+        p.println("||  ID TRANSACTION  |   DADO  | LOCK TYPE  ||");
+        for(String key: this.Lock_Table.keySet()){
+            p.println("||  " + key + "  |  " + this.Lock_Table.get(key).get(0) + "  |  " + this.Lock_Table.get(key).get(1) + "  ||");
+        }
+    }
+    
 }

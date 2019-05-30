@@ -18,8 +18,8 @@ import transactions.lock.Lock_Manager;
  */
 public class Tr_Manager {
     
-    // Columns : 0 - id, 1 - timestamp, 2 - status
     PrintStream p = System.out; // So pra simplificar o uso do print
+    // Columns : 0 - id, 1 - timestamp, 2 - status
     Map<String, List<Object>> transactions = new HashMap<>();
     Lock_Manager lockManager = new Lock_Manager(this);
     String active, committed, aborted;
@@ -47,6 +47,7 @@ public class Tr_Manager {
     public void toAbort(String idTransaction){
         if(this.transactions.containsKey(idTransaction)){
             this.transactions.get(idTransaction).set(1, this.isAborted());
+            this.lockManager.U(idTransaction);
         }else{
             p.println("TRANSACAO NAO REGISTRADA!");
         }
@@ -64,23 +65,31 @@ public class Tr_Manager {
         timeAndStatus.add(this.isActive());
         this.transactions.put(idTransaction, timeAndStatus);
         time++;
-        
+        p.println("\n\nBegin Translate: ");
+        this.printTransactions();
     }
     
     public void R(String idTransaction, String dado){ // Read dado
         if(this.transactions.containsKey(idTransaction)){ // Checking if idTransaction is already registred
-            //lockManager.LS(idTransaction, dado);
+            // Checking if need to transform to active
+            this.transactions.get(idTransaction).set(1, this.isActive());
+            lockManager.LS(idTransaction, dado);
         }else{
             p.println("Operacao invalida! Transacao nao registrada!");
         }
+//        p.println("\n\nRead: ");
+//        this.printTransactions();
     }
     
     public void W(String idTransaction, String dado){ // Write dado
         if(this.transactions.containsKey(idTransaction)){ // Checking if idTransaction is already registred
+            this.transactions.get(idTransaction).set(1, this.isActive());
             lockManager.LX(idTransaction, dado);
         }else{
             p.println("Operacao invalida! Transacao nao registrada!");
         }
+//        p.println("\n\nWrite: ");
+//        this.printTransactions();
     }
     
     public void CM(String idTransaction){
@@ -90,5 +99,15 @@ public class Tr_Manager {
         }else{
             p.println("Operacao invalida! Transacao nao registrada!");
         }
+        p.println("\n\nCommit: ");
+        this.printTransactions();
     }
+    
+    void printTransactions(){
+        p.println("||  ID   |   TIMESTAMP  | STATUS  ||");
+        for(String key: this.transactions.keySet()){
+            p.println("||  " + key + "  |  " + this.transactions.get(key).get(0) + "  |  " + this.transactions.get(key).get(1) + "  ||");
+        }
+    }
+
 }
