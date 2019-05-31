@@ -64,8 +64,8 @@ public class Lock_Manager {
             List<String> dadoAndLock = this.Lock_Table.get(idTransaction1);
             if(dadoAndLock.get(0).equals(dado)){
                 p.println("dado igual");
-                // Caso em que há outra transação com lock sobre o dado
-                if(!idTransaction1.equals(idTransaction2)){
+                // Caso em que há outra transação com lock sobre o dado e se não são duas shareds
+                if(!idTransaction1.equals(idTransaction2) && !dadoAndLock.get(1).equals(this.isShared())){
                     this.WaitDie(idTransaction1, idTransaction2, dado, this.isShared());
                 }
                 // Caso em que a transação já tem lock sobre o dado
