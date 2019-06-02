@@ -63,7 +63,6 @@ public class Lock_Manager {
             idTransaction1 = ids.next();
             List<String> dadoAndLock = this.Lock_Table.get(idTransaction1);
             if(dadoAndLock.get(0).equals(dado)){
-                p.println("dado igual");
                 // Caso em que há outra transação com lock sobre o dado e se não são duas shareds
                 if(!idTransaction1.equals(idTransaction2) && !dadoAndLock.get(1).equals(this.isShared())){
                     this.WaitDie(idTransaction1, idTransaction2, dado, this.isShared());
@@ -145,23 +144,31 @@ public class Lock_Manager {
         this.printLockTable();
     }
     
-    void getElementsFromQueue(String dado){
+    public void getElementsFromQueue(String dado){
         
+        p.println("chamou");
         Wait_Q waitQ = this.dado_queue.get(dado);
+        p.println(waitQ.getQueue().toString());
         if (waitQ != null) {
+            p.println("entrou no waitQ");
             Map<String, String> queue = waitQ.getQueue();
-            boolean mustContinue = true;
+            p.println(queue.toString());
+            boolean mustContinue = false;
             Map.Entry<String, String> transaction;
             String idTransaction;
             Iterator<Map.Entry<String, String>> transactions = queue.entrySet().iterator();
             while(transactions.hasNext() && !mustContinue){  
+                p.println(transactions);
                 transaction = transactions.next();
                 idTransaction = transaction.getKey();
+                p.println(idTransaction);
+                p.println("id transaction" + idTransaction);
                 //for(String idTransaction: transactions.keySet()){
                 if(this.Lock_Table.containsKey(idTransaction)){
                     this.Lock_Table.get(idTransaction).set(1, transaction.getValue());
                 }
-                else if(this.dado_queue.containsKey(dado) && this.checkCanRemoveFromQueue(dado, transaction.getValue())){
+                else if(this.checkCanRemoveFromQueue(dado, transaction.getValue())){
+                    p.println("pode colocar");
                     if (transaction.getValue().equals(this.isShared())){
                         this.LS(idTransaction, dado);
                     }else{
@@ -179,7 +186,7 @@ public class Lock_Manager {
     boolean checkCanRemoveFromQueue(String dado, String typeLock){
         
         List<String> lockers = this.getAllLockers(dado);
-        if(lockers.contains(this.isExclusive())||typeLock.equals(this.isExclusive())){
+        if(lockers.contains(this.isExclusive())||(lockers.contains(this.isShared()) && typeLock.equals(this.isExclusive()))){
             return false;
         }
         else{
