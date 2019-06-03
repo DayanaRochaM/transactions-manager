@@ -103,6 +103,7 @@ public class FileManager {
         // Caso geral que executa a funcao acima para toda linha
         for(String line: lines){
             this.executeLine(line);
+            this.trManager = new Tr_Manager();
         }
     }
 }

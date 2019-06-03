@@ -74,12 +74,13 @@ public class Lock_Manager {
                     newdadoAndLock.add(this.isShared());
                     this.Lock_Table.put(idTransaction2, newdadoAndLock);
                 }
+                this.getElementsFromQueue(dadoAndLock.get(0));
+                this.getElementsFromQueue(dado);
                 processed = true;
             }
         }
         // Caso em que não há transacao acessando o dado
         if(!processed){
-            p.println("entrou");
             List<String> dadoAndLock = new ArrayList<>();
             dadoAndLock.add(dado);
             dadoAndLock.add(this.isShared());
@@ -87,6 +88,8 @@ public class Lock_Manager {
         }  
         p.println("\n\nLS: ");
         this.printLockTable();
+        
+        this.getFromAllQueues();
     }
     
     public void LX(String idTransaction2, String dado){ 
@@ -127,6 +130,8 @@ public class Lock_Manager {
         }
         p.println("\n\nLX: ");
         this.printLockTable();
+        
+        this.getFromAllQueues();
     }
 
     public void U(String idTransaction){
@@ -136,46 +141,42 @@ public class Lock_Manager {
             dado = this.Lock_Table.get(idTransaction).get(0);
             this.Lock_Table.remove(idTransaction);
             this.getElementsFromQueue(dado);
-        }else{
-            p.println("Nao há esse elemento!");
         }
         // Aqui deve-se pegar a lista do dado e pegar a proxima transacao
-        p.println("\n\nU: ");
-        this.printLockTable();
+        //p.println("\n\nU: ");
+        //this.printLockTable();
+    }
+    
+    void getFromAllQueues(){
+        for(String dado: this.dado_queue.keySet()){
+            this.getElementsFromQueue(dado);
+        }
     }
     
     public void getElementsFromQueue(String dado){
         
-        p.println("chamou");
         Wait_Q waitQ = this.dado_queue.get(dado);
-        p.println(waitQ.getQueue().toString());
         if (waitQ != null) {
-            p.println("entrou no waitQ");
             Map<String, String> queue = waitQ.getQueue();
-            p.println(queue.toString());
             boolean mustContinue = false;
             Map.Entry<String, String> transaction;
             String idTransaction;
             Iterator<Map.Entry<String, String>> transactions = queue.entrySet().iterator();
             while(transactions.hasNext() && !mustContinue){  
-                p.println(transactions);
                 transaction = transactions.next();
                 idTransaction = transaction.getKey();
-                p.println(idTransaction);
-                p.println("id transaction" + idTransaction);
                 //for(String idTransaction: transactions.keySet()){
                 if(this.Lock_Table.containsKey(idTransaction)){
                     this.Lock_Table.get(idTransaction).set(1, transaction.getValue());
                 }
                 else if(this.checkCanRemoveFromQueue(dado, transaction.getValue())){
-                    p.println("pode colocar");
+                    waitQ.removeFromQueue(idTransaction);
                     if (transaction.getValue().equals(this.isShared())){
                         this.LS(idTransaction, dado);
                     }else{
                         this.LX(idTransaction, dado);
                     }
-                    waitQ.removeFromQueue(idTransaction);
-                    transactions = this.dado_queue.get(dado).getQueue().entrySet().iterator();
+                    //transactions = this.dado_queue.get(dado).getQueue().entrySet().iterator();
                 }else{
                     mustContinue = false;
                 }
@@ -214,10 +215,9 @@ public class Lock_Manager {
         // 1 - Se o timestamp Ti < timestamp Tj, Tj é abortada (ABORTED)
         // 2 - Caso contrario, Tj vai pra Wait_Q do dado
         if(this.trManager.getTimestamp(idTransaction1) < this.trManager.getTimestamp(idTransaction2)){
-            p.println("abort");
             this.trManager.toAbort(idTransaction2);
+            p.print("\n\nTransação " + idTransaction2 + " abortada!");
         }else{
-            // Ver se tem uma fila 
             this.dado_queue.get(dado).addToQueue(idTransaction2, lockType);
         }
         this.U(idTransaction2);
