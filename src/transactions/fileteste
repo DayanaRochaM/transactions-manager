@@ -1,1 +1,2 @@
 BT(1),BT(2),R2(x),R1(y),W1(y),R2(y),W1(z),CM(1),W2(y),R2(z),W2(z),CM(2)
+BT(1),R1(y),BT(2),R2(x),W1(x),BT(3),W2(z),R3(x),R2(x),CM(2),W3(x),CM(3),BT(4),W4(y),CM(1),CM(4)

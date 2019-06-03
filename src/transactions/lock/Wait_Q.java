@@ -5,6 +5,7 @@
  */
 package transactions.lock;
 
+import java.io.PrintStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -15,13 +16,33 @@ import java.util.Map;
 public class Wait_Q {
     
     // columns : 0 - id transaction, 1 - type lock 
-    Map<String, String> cache = new LinkedHashMap<>(0,0,false);
+    Map<String, String> queue = new LinkedHashMap<>(0,20,false);
+    PrintStream p = System.out;
     
     void addToQueue(String idTransaction, String typeLock){
-        cache.put(idTransaction, typeLock);
+        queue.put(idTransaction, typeLock);
+        p.println("\n\nAdd to Queue: ");
+        this.printQueue();
+    }
+    
+    Map<String, String> getQueue(){
+        return this.queue;
     }
     
     void removeFromQueue(String idTransaction){
-        cache.remove(idTransaction);
+        queue.remove(idTransaction);
+        p.println("\n\nRemove from Queue: ");
+        this.printQueue();
+    }
+    
+    String getTypeLock(String idTransaction){
+        return queue.get(idTransaction);
+    }
+    
+    void printQueue(){
+        p.println("||  ID TRANSACTION | TYPE LOCK  ||");
+        for(String key: this.queue.keySet()){
+            p.println("||  " + key + "  |  " + this.queue.get(key) + "  ||");
+        }
     }
 }
